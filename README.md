@@ -30,3 +30,9 @@ Script akan update otomatis setiap hari. Tampermonkey akan memberitahu jika ada 
 ---
 
 **Catatan:** Gunakan dengan bijak. Script ini untuk edukasi.
+# Brave-Style YouTube Adblock
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## 🚀 Install
+...
