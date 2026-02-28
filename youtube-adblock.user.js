@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Brave-Style YouTube Adblock
 // @namespace    https://github.com/Unknows05/Brave-StyleYouTubeAdblock
-// @version      2.3.0
-// @description  Multi-layer adblock mimicking Brave Shields - FIXED: Manual Pause, No Blank Screen, Cross-device compatibility
+// @version      2.4.0
+// @description  Multi-layer adblock mimicking Brave Shields - FIXED: Blank Screen Hijacking & Manual Pause
 // @author       Unknows05 & Gemini AI
 // @match        https://www.youtube.com/*
 // @match        https://m.youtube.com/*
@@ -17,100 +17,101 @@
 (function() {
     'use strict';
 
-    // ============================================================
-    // 1. PASSIVE NETWORK SHIELD (Meniru Brave Shields asli)
-    // ============================================================
+    // 1. RECOVERY WATCHDOG (Mencegah Layar Blank)
+    // Meniru fitur "Self-Healing" pada Brave untuk elemen yang disembunyikan paksa
+    const startWatchdog = () => {
+        const fixDisplay = () => {
+            // Target utama: Container yang sering dibuat 'hidden' oleh YouTube
+            const playerSelectors = [
+                '#player-container', 
+                '#ytd-player', 
+                '.html5-video-container', 
+                'video',
+                '.html5-main-video'
+            ];
+            
+            playerSelectors.forEach(selector => {
+                const el = document.querySelector(selector);
+                if (el && (window.getComputedStyle(el).display === 'none' || window.getComputedStyle(el).visibility === 'hidden')) {
+                    el.style.setProperty('display', 'block', 'important');
+                    el.style.setProperty('visibility', 'visible', 'important');
+                    el.style.setProperty('opacity', '1', 'important');
+                }
+            });
+        };
+
+        // Jalankan setiap 1 detik untuk memastikan player tetap "hidup"
+        setInterval(fixDisplay, 1000);
+    };
+
+    // 2. NETWORK SHIELD
     const blockAdsNetwork = () => {
         const adPatterns = /googleads|doubleclick|adservice|pagead|imasdk/i;
-        
         const originalFetch = window.fetch;
         window.fetch = function(input, init) {
             let url = typeof input === 'string' ? input : input.url;
-            if (url && adPatterns.test(url)) {
-                return Promise.reject(new TypeError('Blocked by Brave-Style Shield'));
-            }
+            if (url && adPatterns.test(url)) return Promise.reject(new TypeError('Shielded'));
             return originalFetch.apply(this, arguments);
         };
 
         const originalOpen = XMLHttpRequest.prototype.open;
         XMLHttpRequest.prototype.open = function(method, url) {
-            if (typeof url === 'string' && adPatterns.test(url)) {
-                return; // Batalkan request secara diam-diam
-            }
+            if (typeof url === 'string' && adPatterns.test(url)) return;
             return originalOpen.apply(this, arguments);
         };
     };
 
-    // ============================================================
-    // 2. REACTIVE AD-SKIPPER (Hanya aktif SAAT ada iklan)
-    // ============================================================
+    // 3. REACTIVE SKIPPER (Hanya aktif saat class ad-showing muncul)
     const handleAdsOnly = () => {
         const observer = new MutationObserver(() => {
             const video = document.querySelector('video');
             const adShowing = document.querySelector('.ad-showing, .ytp-ad-player-overlay');
 
             if (adShowing && video) {
-                // HANYA jika sedang ada iklan, kita percepat/skip
                 video.muted = true;
                 if (isFinite(video.duration) && video.duration > 0) {
                     video.currentTime = video.duration - 0.1;
                 }
-                // Paksa play HANYA untuk melewati iklan ini, bukan saat video normal
                 video.play().catch(() => {});
+                
+                // Cari tombol skip secara spesifik
+                const skipBtn = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern');
+                if (skipBtn) skipBtn.click();
             }
-
-            // Click Skip Button jika muncul secara fisik
-            const skipBtn = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern');
-            if (skipBtn) skipBtn.click();
         });
 
         observer.observe(document.documentElement, {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['class']
+            childList: true, 
+            subtree: true, 
+            attributes: true, 
+            attributeFilter: ['class'] 
         });
     };
 
-    // ============================================================
-    // 3. BRAVE-STYLE DOM FILTERING (CSS Injection)
-    // ============================================================
+    // 4. CSS REINFORCEMENT
     const injectShieldCSS = () => {
         const style = document.createElement('style');
-        style.id = 'brave-shield-v2';
         style.textContent = `
-            /* Sembunyikan Iklan & Popup tanpa merusak player */
             ytd-ad-slot-renderer, #masthead-ad, .ytp-ad-overlay-container,
             tp-yt-iron-overlay-backdrop, ytd-enforcement-message-view-model,
-            yt-mealbar-promo-renderer, ytd-compact-promoted-video-renderer,
-            .ytp-ad-message-container, #player-ads {
+            yt-mealbar-promo-renderer, #player-ads, ytd-ad-slot-renderer {
                 display: none !important;
-                visibility: hidden !important;
             }
-            /* Pastikan Video Player Tetap Terlihat (Anti-Blank) */
-            ytd-watch-flexy, #player, #player-container, video {
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
+            /* Mencegah player hilang saat transisi iklan ke video utama */
+            .html5-video-player.ad-showing video {
+                opacity: 0 !important; /* Sembunyikan iklan secara visual */
+            }
+            .html5-video-player:not(.ad-showing) video {
+                opacity: 1 !important; /* Paksa video utama muncul */
             }
         `;
         document.documentElement.appendChild(style);
     };
 
-    // ============================================================
-    // 4. ENVIRONMENT SPOOFING
-    // ============================================================
-    const spoofEnvironment = () => {
-        // Mengelabui variabel internal YouTube agar mengira adblock tidak aktif
-        try {
-            Object.defineProperty(window, 'yt_adblock_detected', { get: () => false, configurable: true });
-        } catch(e) {}
-    };
-
-    // EXECUTION LOGIC
+    // INITIALIZE
     blockAdsNetwork();
     injectShieldCSS();
-    spoofEnvironment();
+    startWatchdog(); // Jalankan penyembuh layar blank
     
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', handleAdsOnly);
@@ -118,5 +119,5 @@
         handleAdsOnly();
     }
 
-    console.log('🛡️ Brave-Style YouTube Adblock v2.3.0 Active');
+    console.log('🛡️ Brave-Style v2.4.0: Watchdog Active');
 })();
