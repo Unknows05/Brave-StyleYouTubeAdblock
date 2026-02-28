@@ -1,10 +1,10 @@
-# 🛡️ Brave-Style YouTube Adblock (v2.4.0)
+# 🛡️ Brave-Style YouTube Adblock (v2.3.0)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tampermonkey](https://img.shields.io/badge/Userscript-Tampermonkey-orange)](https://www.tampermonkey.net/)
 [![Brave Engine](https://img.shields.io/badge/Engine-Brave%20Shields%20Mimic-lion)](https://brave.com/)
 
-Script pemblokir iklan YouTube **Multi-Layer**, dirancang khusus untuk meniru metode kerja **Brave Shields** secara native di dalam browser melalui Userscript.
+Script pemblokir iklan YouTube **Hybrid-Layer**, dirancang khusus untuk mereplikasi mekanisme **Brave Shields** secara native melalui manipulasi Network & DOM dalam ekosistem Userscript.
 
 ---
 
@@ -12,48 +12,50 @@ Script pemblokir iklan YouTube **Multi-Layer**, dirancang khusus untuk meniru me
 
 [![Install](https://img.shields.io/badge/Install%20Script-🛡️%20Tampermonkey-brightgreen?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Unknows05/Brave-StyleYouTubeAdblock/main/youtube-adblock.user.js)
 
-> **Catatan:** Klik tombol di atas untuk langsung diarahkan ke halaman instalasi otomatis Tampermonkey.
+> **Pro Tip:** Pastikan hanya menggunakan satu script adblock di Tampermonkey untuk menghindari konflik logika.
 
 ---
 
-## 🛠️ Fitur Utama (Brave-Logic)
+## 🛠️ Arsitektur Pertahanan (Brave-Logic)
 
-Berbeda dengan adblocker biasa, script ini bekerja di 4 lapisan perlindungan:
+Berbeda dengan script standar, versi **v2.3.0** ini bekerja pada lapisan proteksi yang sinkron:
 
-1.  **Network Shield (Layer 1):** Memutuskan koneksi iklan di level jaringan (Fetch/XHR) sebelum data iklan sempat masuk ke browser.
-2.  **DOM Filtering (Layer 2):** Pembersihan elemen visual iklan (banner, sidebar, sponsored cards) secara instan menggunakan MutationObserver.
-3.  **Ad-Skip Engine (Layer 3):** Mempercepat durasi iklan secara otomatis jika sistem injeksi gagal, memastikan transisi video yang mulus.
-4.  **Anti-Adblock Bypass (Layer 4):** Mengelabui variabel internal YouTube (`yt_adblock_detected`) agar kamu tidak terkena blokir popup "Adblockers are not allowed".
+1.  **Passive Network Shield:** Memutus request iklan di level `Fetch` & `XHR` sebelum script iklan Google sempat dieksekusi oleh browser.
+2.  **Reactive Ad-Skipper:** Menggunakan `MutationObserver` (bukan interval kasar) untuk mendeteksi iklan video secara instan tanpa membebani CPU.
+3.  **Environment Spoofing:** Mengelabui integritas variabel internal YouTube (`yt_adblock_detected`) untuk mencegah pemicu popup "Adblockers are not allowed".
+4.  **Static UI Filtering:** Injeksi CSS tingkat tinggi untuk membersihkan slot iklan banner, sidebar, dan *sponsored cards* secara permanen.
 
 ---
 
-## 📋 Cara Instalasi Manual
+## 📋 Panduan Instalasi
 
-1.  Install extension [Tampermonkey](https://www.tampermonkey.net/) atau [Violentmonkey](https://violentmonkey.github.io/).
+1.  Pasang ekstensi [Tampermonkey](https://www.tampermonkey.net/) (Rekomendasi) atau [Violentmonkey](https://violentmonkey.github.io/).
 2.  Klik tombol **Install Script** berwarna hijau di atas ☝️.
-3.  Klik tombol **"Install"** atau **"Update"** pada jendela popup Tampermonkey yang muncul.
-4.  **Selesai!** Buka YouTube dan nikmati tontonan tanpa gangguan iklan.
+3.  Klik **"Install"** atau **"Update"** pada jendela konfirmasi yang muncul.
+4.  Buka YouTube dan nikmati pengalaman menonton yang bersih.
+
+---
+
+## 💎 Keunggulan Stabilitas v2.3.0
+
+Versi ini berfokus pada **User Experience** yang murni tanpa mengorbankan fungsionalitas browser:
+
+* **True Manual Pause:** Memperbaiki bug di mana video berputar sendiri saat di-pause. Sekarang kontrol penuh ada di tangan user.
+* **Anti-Blank Screen:** Logika pemblokiran jaringan yang presisi untuk mencegah player YouTube menjadi hitam/stuck.
+* **Zero-Lag Engine:** Tanpa penggunaan `setInterval` yang agresif, menjaga penggunaan RAM tetap rendah.
 
 ---
 
 ## 🔄 Sistem Auto-Update
 
-Script ini dikonfigurasi untuk **Update Otomatis**. Setiap kali ada perubahan algoritma dari YouTube, saya akan melakukan pembaruan di repositori ini, dan Tampermonkey kamu akan otomatis mendownload versi terbaru di latar belakang tanpa perlu install ulang.
+Script ini mendukung penuh **Auto-Update**. Ketika YouTube memperbarui algoritma deteksinya, repositori ini akan diperbarui dan Tampermonkey kamu akan melakukan sinkronisasi otomatis di latar belakang.
 
 ---
 
-## ⚠️ Perbaikan Bug Terkini (v2.3.0)
+## 📜 Lisensi
 
-* **Fixed Manual Pause:** Sekarang kamu bisa menekan tombol *Pause* tanpa video berputar sendiri secara otomatis.
-* **Fixed Blank Screen:** Mencegah layar video menjadi hitam/kosong saat iklan diblokir.
-* **Anti-Enforcement:** Menghilangkan pesan peringatan adblock terbaru dari YouTube secara permanen.
+Proyek ini dilisensikan di bawah **MIT License**. Dibuat untuk tujuan riset mengenai keamanan web, manipulasi DOM, dan optimasi performa browser.
 
 ---
-
-## 📜 Lisensi & Edukasi
-
-Proyek ini dilisensikan di bawah **MIT License**. Gunakan dengan bijak. Script ini dibuat untuk tujuan edukasi mengenai cara kerja sistem keamanan web dan manipulasi DOM.
-
----
-**Author:** [Unknows05](https://github.com/Unknows05)  
-*Special thanks to the Brave Browser Team for the logic inspiration.*
+**Maintained by:** [Unknows05](https://github.com/Unknows05)  
+*Special thanks to the Brave Browser logic for the technical inspiration.*
