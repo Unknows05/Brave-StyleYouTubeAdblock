@@ -1,4 +1,4 @@
-# 🛡️ Brave-Style YouTube Adblock (v2.3.0)
+# 🛡️ Brave-Style YouTube Adblock (v2.4.0)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tampermonkey](https://img.shields.io/badge/Userscript-Tampermonkey-orange)](https://www.tampermonkey.net/)
